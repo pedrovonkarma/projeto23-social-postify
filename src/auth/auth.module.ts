@@ -3,8 +3,9 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
-import { UserRepository } from 'src/user/repository/user.repository';
 import { PrismaUsersRepository } from 'src/user/repository/implementation/prismaUser.repository';
+import { AuthGuard } from './auth-guard/auth.guard';
+import { UsersRepository } from 'src/user/repository/user.repository';
 
 @Module({
   imports: [
@@ -17,9 +18,11 @@ import { PrismaUsersRepository } from 'src/user/repository/implementation/prisma
     AuthService,
     UserService,
     {
-      provide: UserRepository,
+      provide: UsersRepository,
       useClass: PrismaUsersRepository,
     },
+    AuthGuard,
   ],
+  exports: [AuthGuard, AuthService],
 })
 export class AuthModule {}

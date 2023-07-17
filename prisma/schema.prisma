@@ -11,24 +11,29 @@ datasource db {
 }
 
 model User {
-  id          Int           @id @default(autoincrement())
-  name        String        @db.VarChar(255)
-  email       String        @unique
-  password    String
-  avatar      String
-  createdAt   DateTime      @default(now())
-  Publication Publication[]
+  id        Int      @id @default(autoincrement())
+  name      String
+  password  String
+  avatar    String
+  email     String   @unique
+  createdAt DateTime @default(now())
+  posts     Post[]
+
+  @@map("users")
 }
 
-model Publication {
+model Post {
   id            Int      @id @default(autoincrement())
   image         String
-  title         String   @db.VarChar(255)
-  text          String   @db.VarChar(255)
-  dateToPublish DateTime
+  title         String   @unique
+  text          String
+  dateToPublish String
   published     Boolean  @default(false)
-  socialMedia   String   @db.VarChar(255)
+  socialMedia   String
   userId        Int
   createdAt     DateTime @default(now())
-  User          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("posts")
 }

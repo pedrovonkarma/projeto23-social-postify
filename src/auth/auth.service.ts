@@ -1,17 +1,24 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { AuthSignUpDTO } from './dto/auth-signup.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
-import { AuthSignUpDTO } from './dto/auth-signup.dto';
-import { AuthSigninDTO } from './dto/auth-login.dto';
 import { UserService } from 'src/user/user.service';
-import { UserRepository } from 'src/user/repository/user.repository';
+import { AuthSigninDTO } from './dto/auth-login.dto';
+import { UsersRepository } from 'src/user/repository/user.repository';
 
 @Injectable()
 export class AuthService {
+  private AUDIENCE: string = 'users';
+  private ISSUER: string = 'social postify';
+
   constructor(
     private readonly usersService: UserService,
-    private readonly usersRepository: UserRepository,
+    private readonly usersRepository: UsersRepository,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -40,11 +47,24 @@ export class AuthService {
       {
         expiresIn: '7 days',
         subject: String(user.id),
-        issuer: 'social postify',
-        audience: 'users',
+        audience: this.AUDIENCE,
+        issuer: this.ISSUER,
       },
     );
 
     return { token };
+  }
+
+  checkeToken(token: string) {
+    try {
+      const data = this.jwtService.verify(token, {
+        audience: this.AUDIENCE,
+        issuer: this.ISSUER,
+      });
+      return data;
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error);
+    }
   }
 }
